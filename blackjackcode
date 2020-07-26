@@ -1,0 +1,182 @@
+# Blackjack game
+
+from random import shuffle
+
+#global variable
+
+dealerHand = []
+playerHand = []
+
+#type in your name
+def playername():
+    name = input("Please enter your name: ")
+
+    return name
+
+#shuffled deck
+def deck():
+    deck = []
+    for suit in ['Hearts','Spades','Diamond','Clubs']:
+        for rank in ['A','2','3','4','5','6','7','8','9','T','J','Q','K']:
+            deck.append(rank + " of " + suit)
+
+    shuffle(deck)
+
+    return deck
+
+# player turn
+def createPlayingHands(myDeck):
+    playerHand.append(myDeck.pop())
+    playerHand.append(myDeck.pop())
+
+    print("You have: " + str(playerHand))
+
+    #draw card
+    drawcard = input("Do you want to draw another card: Y / N   ")
+
+    cardcounts = 0
+
+    while cardcounts < 3:
+
+        while drawcard not in ["Y" , "N" , "y" , "n"]:
+            drawcard = input("Invalid option. Do you want to draw another card: Y / N    ")
+
+
+        if drawcard == 'N' or drawcard == 'n':
+            cardcounts = 3
+        else:
+            cardcounts += 1
+            playerHand.append(myDeck.pop())
+            print("You have: " + str(playerHand))
+            drawcard = input("Do you want to draw another card: Y/N   ")
+
+
+    return
+
+#dealer's turn
+def createDealerHand(myDeck):
+    dealerHand.append(myDeck.pop())
+    dealerHand.append(myDeck.pop())
+    print("Dealer have: " + str(dealerHand))
+
+    return
+
+# Player's card and count
+def pointCount(myCards):
+
+    myCount = 0
+    aceCount = 0
+    cardCount = 0
+
+    for i in myCards:
+            if(i[0] == "T" or i[0] == "J" or i[0] == "Q" or i[0] == "K"):
+                myCount += 10
+                cardCount += 1
+            elif(i[0] != 'A'):
+                myCount += int(i[0])
+                cardCount += 1
+            elif(i[0] == 'A'):
+                aceCount += 1
+                cardCount += 1
+
+    if aceCount == 1 and cardCount == 2 and myCount == 10:
+        myCount = 21
+    elif aceCount == 2 and myCount == 0:
+        myCount = 21
+    elif aceCount == 1 and cardCount == 2:
+        myCount += 11
+    elif aceCount == 1 and cardCount > 2 and myCount <= 11:
+        myCount += 10
+    elif aceCount == 1 and cardCount > 2 and myCount > 11:
+        myCount += 1
+    elif cardCount == 5 and myCount <= 21:
+        myCount = 0
+
+    return myCount
+
+#dealers point and count
+def dealerCount(myCards):
+
+    myCount = 0
+    aceCount = 0
+    cardCount = 0
+    totalCount = 0
+    valid = True
+
+    while valid:
+        for i in myCards:
+            if(i[0] == "T" or i[0] == "J" or i[0] == "Q" or i[0] == "K"):
+                myCount += 10
+                cardCount += 1
+                totalCount += 1
+            elif(i[0] != 'A'):
+                myCount += int(i[0])
+                cardCount += 1
+                totalCount += 1
+            elif(i[0] == 'A'):
+                aceCount += 1
+                cardCount += 1
+
+        if aceCount == 1 and totalCount < 2 and myCount == 10:
+            myCount = 21
+        elif aceCount == 2 and myCount == 0:
+            myCount = 21
+        elif aceCount == 1 and totalCount < 2:
+            myCount += 11
+        elif aceCount == 1 and totalCount > 2 and myCount <= 11:
+            myCount += 10
+        elif aceCount == 1 and totalCount > 2 and myCount > 11:
+            myCount += 1
+        elif cardCount == 5 and myCount <= 21:
+            myCount = 0
+
+        if 0 < myCount < 15 and cardCount < 5:
+            dealerHand.append(myDeck.pop())
+        else:
+            valid = False
+
+
+    return myCount
+
+# check winner
+def checkWinner(name):
+    cards_dealer(name)
+    cards_player(name)
+    check_tie()
+
+def cards_dealer(name):
+    if dealerCount(hisCards) > pointCount(myCards) and dealerCount(hisCards) <= 21 or dealerCount(hisCards) < pointCount(myCards) and pointCount(myCards) > 21 or dealerCount(hisCards) == 0 and pointCount(myCards) != 0:
+        print(name + " has " + str(pointCount(myCards)))
+        print("Dealer has " + str(dealerCount(hisCards)))
+        print("Dealer is the winner!")
+
+def cards_player(name):
+    if dealerCount(hisCards) < pointCount(myCards) and pointCount(myCards) <= 21 and dealerCount(hisCards) != 15 or dealerCount(hisCards) > pointCount(myCards) and dealerCount(hisCards) > 21 or pointCount(myCards) == 0 and dealerCount(hisCards) != 0 and dealerCount(hisCards) != 15:
+        print(name + " has " + str(pointCount(myCards)))
+        print("Dealer has " + str(dealerCount(hisCards)))
+        print(name + " is the winner!")
+
+def check_tie():
+    if dealerCount(hisCards) == pointCount(myCards) or dealerCount(hisCards) == 15 or dealerCount(hisCards) > 21 and pointCount(myCards) > 21:
+        print("Draw game!")
+
+#definition
+
+myDeck = deck()
+myCards = playerHand
+hisCards = dealerHand
+myName = playername()
+
+# actual game
+def play_game():
+    createDealerHand(myDeck)
+    createPlayingHands(myDeck)
+    pointCount(myCards)
+    dealerCount(hisCards)
+    checkWinner(myName)
+
+
+
+
+play_game()
+print(dealerHand)
